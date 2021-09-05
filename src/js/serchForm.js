@@ -5,7 +5,8 @@ import ApiService from "./apiService";
 import { markup } from "./markup";
 import { refs } from "./refs";
 
-const newApiService = new ApiService()
+const newApiService = new ApiService();
+refs.loadMoreBtn.disabled = true;
 
 const onSubmitBtn = (e) => {
     e.preventDefault();
@@ -14,8 +15,13 @@ const onSubmitBtn = (e) => {
     if (newApiService.query) {
         newApiService.fetchApi()
         .then(data => {
-            if (data.hits.length) {
+            if (data.hits.length === 12) {
                 markup(data.hits)
+                refs.loadMoreBtn.disabled = false;
+            } else if (data.hits.length < 12 && data.hits.length)  {
+                markup(data.hits);
+                refs.loadMoreBtn.disabled = true;
+                error({text: 'По вашему запросу больше нет картинок',})
             } else {
                 error({text: 'По вашему запросу ничего не найдено',})
             }
@@ -26,7 +32,14 @@ const onSubmitBtn = (e) => {
 const onSubmitLoadMore = (e) => {
     e.preventDefault()
     newApiService.fetchApiLoadMore()
-    .then(data=>markup(data.hits))
+    .then(data=> {
+        if (data.hits.length) {
+            markup(data.hits)
+        } else {
+            refs.loadMoreBtn.disabled = true;
+            error({text: 'По вашему запросу больше нет картинок',})
+        }
+    })
     
 };
 
